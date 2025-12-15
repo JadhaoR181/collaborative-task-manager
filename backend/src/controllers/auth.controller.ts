@@ -50,3 +50,13 @@ export const login = async (req: Request, res: Response) => {
     res.status(401).json({ message: error.message });
   }
 };
+
+export const logout = async (_req: Request, res: Response) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false // true in production (HTTPS)
+  });
+
+  res.status(200).json({ message: "Logged out successfully" });
+};

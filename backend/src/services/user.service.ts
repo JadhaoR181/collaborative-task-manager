@@ -1,5 +1,5 @@
 import { ApiError } from "../utils/apiError";
-import { findUserById, updateUserProfile } from "../repositories/user.repository";
+import { findUserById, updateUserProfile, findAllUsers } from "../repositories/user.repository";
 
 export const getCurrentUser = async (userId: string) => {
   const user = await findUserById(userId);
@@ -15,4 +15,8 @@ export const updateProfile = async (userId: string, name: string) => {
   }
 
   return updateUserProfile(userId, name);
+};
+
+export const getAllUsers = async () => {
+  return findAllUsers();
 };

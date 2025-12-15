@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCurrentUser, updateProfile } from "../services/user.service";
+import { getCurrentUser, updateProfile, getAllUsers } from "../services/user.service";
 import { updateProfileDto } from "../dtos/user.dto";
 
 export const getMe = async (req: Request, res: Response) => {
@@ -15,4 +15,9 @@ export const updateMe = async (req: Request, res: Response) => {
 
   const updatedUser = await updateProfile(userId, validatedData.name);
   res.status(200).json(updatedUser);
+};
+
+export const getUsers = async (_req: Request, res: Response) => {
+  const users = await getAllUsers();
+  res.status(200).json(users);
 };

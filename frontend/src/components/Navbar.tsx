@@ -6,11 +6,17 @@ export default function Navbar() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
-  const logout = async () => {
-    await api.post("/auth/logout"); // optional, backend-safe
+const logout = async () => {
+  try {
+    await api.post("/auth/logout");
+  } catch (err) {
+    console.error("Logout failed", err);
+  } finally {
     setUser(null);
     navigate("/login");
-  };
+  }
+};
+
 
   return (
     <header className="bg-white shadow-sm">
