@@ -1,57 +1,25 @@
-import { createServer } from "http";
-import { Server, Socket } from "socket.io";
+import http from "http";
 import app from "./app";
-import dotenv from "dotenv";
-dotenv.config();
+import { Server } from "socket.io";
+import { setupSockets } from "./sockets";
 
-import jwt from "jsonwebtoken";
-import { addUserSocket, removeUserSocket } from "./sockets/userSocketMap";
+const PORT = 5000;
 
-interface JwtPayload {
-  id: string;
-  email: string;
-}
+// 1️⃣ Create HTTP server from Express app
+const server = http.createServer(app);
 
-const httpServer = createServer(app);
-
-export const io = new Server(httpServer, {
+// 2️⃣ Attach Socket.io to SAME server
+export const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5173", // Vite frontend
     credentials: true
   }
 });
 
-io.use((socket: Socket, next) => {
-  const token = socket.handshake.auth?.token;
+// 3️⃣ Setup socket listeners
+setupSockets(io);
 
-  if (!token) {
-    return next(new Error("Unauthorized"));
-  }
-
-  try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as JwtPayload;
-
-    socket.data.userId = decoded.id;
-    next();
-  } catch {
-    next(new Error("Invalid token"));
-  }
-});
-
-io.on("connection", (socket) => {
-  const userId = socket.data.userId;
-
-  addUserSocket(userId, socket.id);
-
-  socket.on("disconnect", () => {
-    removeUserSocket(userId);
-    console.log(`❌ User disconnected: ${userId}`);
-  });
-});
-
-httpServer.listen(5000, () => {
-  console.log("🚀 Server running at http://localhost:5000");
+// 4️⃣ Start server
+server.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

@@ -7,7 +7,6 @@ import {
   updateTaskById
 } from "../repositories/task.repository";
 import { io } from "../server";
-import { getUserSocket } from "../sockets/userSocketMap";
 import { createNotification } from "../repositories/notification.repository";
 
 export const createNewTask = async (creatorId: string, payload: any) => {
@@ -18,22 +17,21 @@ export const createNewTask = async (creatorId: string, payload: any) => {
   });
 
   if (payload.assignedToId !== creatorId) {
-    const socketId = getUserSocket(payload.assignedToId);
-
     const message = `You have been assigned a new task: ${task.title}`;
 
+    // 1️⃣ Save notification
     await createNotification(payload.assignedToId, message);
 
-    if (socketId) {
-      io.to(socketId).emit("task:assigned", {
-        message,
-        task
-      });
-    }
+    // 2️⃣ Emit to USER ROOM (not socketId)
+    io.to(payload.assignedToId).emit("task:assigned", {
+      message,
+      task
+    });
   }
 
   return task;
 };
+
 
 export const getUserTasks = async (
   userId: string,
@@ -46,7 +44,6 @@ export const getUserTasks = async (
 
   return getTasksForUser(userId, filters);
 };
-
 export const updateTask = async (
   taskId: string,
   userId: string,
@@ -61,8 +58,13 @@ export const updateTask = async (
 
   const updatedTask = await updateTaskById(taskId, payload);
 
-  //  Emit real-time update
-  io.emit("task:updated", updatedTask);
+  // Emit to creator
+  io.to(task.creatorId).emit("task:updated", updatedTask);
+
+  // Emit to assignee
+  if (task.assignedToId && task.assignedToId !== task.creatorId) {
+    io.to(task.assignedToId).emit("task:updated", updatedTask);
+  }
 
   return updatedTask;
 };
