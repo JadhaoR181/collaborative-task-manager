@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../api/axios";
 import { Task } from "./useTasks";
+import toast from "react-hot-toast";
 
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
@@ -57,6 +58,28 @@ export const useUpdateTask = () => {
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }
+  });
+};
+
+export const useDeleteTask = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.delete(`/tasks/${id}`).then(res => res.data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Task deleted successfully");
+    },
+
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        "You are not allowed to delete this task";
+
+      toast.error(message);
     }
   });
 };

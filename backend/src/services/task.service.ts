@@ -70,16 +70,26 @@ export const updateTask = async (
 };
 
 
-export const deleteTask = async (
-  taskId: string,
-  userId: string
-) => {
+export const deleteTask = async (taskId: string, userId: string) => {
   const task = await getTaskById(taskId);
-  if (!task) throw new ApiError(404, "Task not found");
 
-  if (task.creatorId !== userId) {
-    throw new ApiError(403, "Only creator can delete task");
+  if (!task) {
+    throw new ApiError(404, "Task not found");
   }
 
-  return deleteTaskById(taskId);
+  // 🔒 Only creator can delete
+  if (task.creatorId !== userId) {
+    throw new ApiError(403, "Only creator can delete this task");
+  }
+
+  await deleteTaskById(taskId);
+
+  // 🔴 Real-time update
+  io.to(task.creatorId).emit("task:deleted", { taskId });
+
+  if (task.assignedToId && task.assignedToId !== task.creatorId) {
+    io.to(task.assignedToId).emit("task:deleted", { taskId });
+  }
+
+  return { success: true };
 };

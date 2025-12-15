@@ -8,6 +8,8 @@ export interface Task {
   status: string;
   priority: string;
   dueDate: string;
+  creatorId: string;
+  assignedToId?: string;
 }
 
 export const useTasks = (filters?: {

@@ -14,6 +14,6 @@ router.use(authMiddleware);
 router.post("/", createTaskHandler);
 router.get("/", getTasksHandler);
 router.put("/:id", updateTaskHandler);
-router.delete("/:id", deleteTaskHandler);
+router.delete("/:id", authMiddleware, deleteTaskHandler);
 
 export default router;

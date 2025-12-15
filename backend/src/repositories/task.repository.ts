@@ -16,8 +16,11 @@ export const updateTaskById = (id: string, data: any) => {
 };
 
 export const deleteTaskById = (id: string) => {
-  return prisma.task.delete({ where: { id } });
+  return prisma.task.delete({
+    where: { id }
+  });
 };
+
 
 export const getTasksForUser = (userId: string, filters: any) => {
   return prisma.task.findMany({

@@ -5,3 +5,10 @@ export const createNotification = (userId: string, message: string) => {
     data: { userId, message }
   });
 };
+
+export const markAllAsRead = (userId: string) => {
+  return prisma.notification.updateMany({
+    where: { userId, read: false },
+    data: { read: true }
+  });
+};

@@ -7,7 +7,7 @@ export default function NotificationItem({
 }) {
   return (
     <div
-      className={`p-3 border-b text-sm ${
+      className={`px-4 py-3 text-sm border-b ${
         notification.read ? "bg-white" : "bg-indigo-50"
       }`}
     >

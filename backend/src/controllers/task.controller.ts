@@ -33,8 +33,8 @@ export const updateTaskHandler = async (req: Request, res: Response) => {
 
 export const deleteTaskHandler = async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
-  const taskId = req.params.id;
+  const { id } = req.params;
 
-  await deleteTask(taskId, userId);
-  res.status(204).send();
+  const result = await deleteTask(id, userId);
+  res.status(200).json(result);
 };
