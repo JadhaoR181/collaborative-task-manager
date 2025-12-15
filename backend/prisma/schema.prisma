@@ -15,9 +15,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  createdTasks Task[] @relation("CreatedTasks")
-  assignedTasks Task[] @relation("AssignedTasks")
+  createdTasks  Task[]         @relation("CreatedTasks")
+  assignedTasks Task[]         @relation("AssignedTasks")
+  notifications Notification[] @relation("UserNotifications")
 }
+
 
 enum Priority {
   LOW
@@ -34,19 +36,29 @@ enum Status {
 }
 
 model Task {
-  id           String   @id @default(uuid())
-  title        String   @db.VarChar(100)
-  description  String
-  dueDate      DateTime
-  priority     Priority
-  status       Status   @default(TODO)
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(100)
+  description String
+  dueDate     DateTime
+  priority    Priority
+  status      Status   @default(TODO)
 
   creatorId    String
   assignedToId String
 
-  creator      User @relation("CreatedTasks", fields: [creatorId], references: [id])
-  assignedTo   User @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  creator    User @relation("CreatedTasks", fields: [creatorId], references: [id])
+  assignedTo User @relation("AssignedTasks", fields: [assignedToId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  userId    String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation("UserNotifications", fields: [userId], references: [id])
 }
