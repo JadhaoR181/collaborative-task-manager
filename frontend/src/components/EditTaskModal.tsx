@@ -31,7 +31,7 @@ export default function EditTaskModal({ task, onClose }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState: {  isSubmitting }
   } = useForm<EditTaskForm>({
     defaultValues: {
       title: task.title,

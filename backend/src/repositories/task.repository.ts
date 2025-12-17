@@ -22,7 +22,7 @@ export const deleteTaskById = (id: string) => {
 };
 
 
-export const getTasksForUser = (userId: string, filters: any) => {
+export const getTasksForUser = (userId: string, filters: any,  sortOrder: "asc" | "desc") => {
   return prisma.task.findMany({
     where: {
       OR: [
@@ -31,7 +31,7 @@ export const getTasksForUser = (userId: string, filters: any) => {
       ],
       ...filters
     },
-    orderBy: { dueDate: "asc" }
+    orderBy: { dueDate: sortOrder }
   });
 };
 
@@ -45,3 +45,5 @@ export const getOverdueTasks = async () => {
   }
   });
 };
+
+

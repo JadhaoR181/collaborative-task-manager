@@ -42,8 +42,23 @@ export const getUserTasks = async (
 
   if (query.status) filters.status = query.status;
   if (query.priority) filters.priority = query.priority;
+  if (query.assignedToMe === "true") {
+  filters.assignedToId = userId;
+}
 
-  const tasks = await getTasksForUser(userId, filters);
+if (query.createdByMe === "true") {
+  filters.creatorId = userId;
+}
+
+if (query.overdueOnly === "true") {
+  filters.status = { not: "COMPLETED" };
+  filters.dueDate = { lt: new Date() };
+}
+
+   const sortOrder =
+    query.sort === "desc" ? "desc" : "asc"; 
+
+  const tasks = await getTasksForUser(userId, filters, sortOrder);
   return tasks.map(task => ({
     ...task,
     isOverdue: isTaskOverdue(task),

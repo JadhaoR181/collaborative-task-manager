@@ -19,6 +19,10 @@ export interface Task {
 export const useTasks = (filters?: {
   status?: string;
   priority?: string;
+  sort?: "asc" | "desc";
+  assignedToMe?: boolean;
+  createdByMe?: boolean;
+  overdueOnly?: boolean;
 }) => {
   return useQuery({
     queryKey: ["tasks", filters],
