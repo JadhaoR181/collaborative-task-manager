@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 
 
 
+
 export default function Navbar() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -150,9 +151,13 @@ const unreadCount =
 
             {/* Desktop User Info */}
             <div className="hidden md:flex items-center gap-3 pl-4 border-l">
-              <div className="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
+             <div
+  onClick={() => navigate("/profile")}
+  className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-indigo-300 transition"
+>
+  <User className="w-4 h-4 text-indigo-600" />
+</div>
+
               <div>
                 <p className="text-sm font-semibold">{user?.name}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
@@ -179,6 +184,17 @@ const unreadCount =
                 <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
             </div>
+             {/* Profile */}
+    <button
+      onClick={() => {
+        setMobileMenuOpen(false);
+        navigate("/profile");
+      }}
+      className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-100"
+    >
+      <User className="w-5 h-5 text-indigo-600" />
+      <span className="text-sm font-medium">Profile</span>
+    </button>
 
             <button
               onClick={logout}
