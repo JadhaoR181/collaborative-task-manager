@@ -49,6 +49,8 @@ model Task {
   creator    User @relation("CreatedTasks", fields: [creatorId], references: [id])
   assignedTo User @relation("AssignedTasks", fields: [assignedToId], references: [id])
 
+  overdueNotified    Boolean  @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -9,6 +9,7 @@ import {
 import { io } from "../server";
 import { createNotification } from "../repositories/notification.repository";
 
+
 export const createNewTask = async (creatorId: string, payload: any) => {
   const task = await createTask({
     ...payload,
@@ -42,7 +43,12 @@ export const getUserTasks = async (
   if (query.status) filters.status = query.status;
   if (query.priority) filters.priority = query.priority;
 
-  return getTasksForUser(userId, filters);
+  const tasks = await getTasksForUser(userId, filters);
+  return tasks.map(task => ({
+    ...task,
+    isOverdue: isTaskOverdue(task),
+    isDueToday: isTaskDueToday(task)
+  }));
 };
 
 export const updateTask = async (
@@ -57,6 +63,15 @@ export const updateTask = async (
   if (payload.status && task.assignedToId !== userId) {
     throw new ApiError(403, "Only assignee can update task status");
   }
+  if (payload.status === "COMPLETED") {
+  payload.completedAt = new Date();
+  payload.overdueNotified = false; // reset
+}
+
+if (payload.dueDate) {
+  payload.overdueNotified = false;
+}
+
 
   const updatedTask = await updateTaskById(taskId, payload);
 
@@ -86,7 +101,6 @@ export const updateTask = async (
 };
 
 
-
 export const deleteTask = async (taskId: string, userId: string) => {
   const task = await getTaskById(taskId);
 
@@ -109,4 +123,25 @@ export const deleteTask = async (taskId: string, userId: string) => {
   }
 
   return { success: true };
+};
+
+
+const isTaskOverdue = (task: any) => {
+  if (!task.dueDate) return false;
+  if (task.status === "COMPLETED") return false;
+
+  return new Date(task.dueDate) < new Date();
+};
+
+const isTaskDueToday = (task: any) => {
+  if (!task.dueDate) return false;
+
+  const today = new Date();
+  const due = new Date(task.dueDate);
+
+  return (
+    due.getDate() === today.getDate() &&
+    due.getMonth() === today.getMonth() &&
+    due.getFullYear() === today.getFullYear()
+  );
 };

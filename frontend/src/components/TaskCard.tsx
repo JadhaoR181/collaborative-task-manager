@@ -1,7 +1,8 @@
-import { Trash2, Clock, User as UserIcon } from "lucide-react";
+import { Trash2, Clock, User as UserIcon, AlertTriangle } from "lucide-react";
 import { useUpdateTask, useDeleteTask } from "../hooks/useTaskMutations";
 import { Task } from "../hooks/useTasks";
 import { useAuth } from "../context/useAuth";
+
 
 const priorityConfig: Record<string, { bg: string; text: string; icon: string }> = {
   LOW: { bg: "bg-gray-100", text: "text-gray-700", icon: "🟢" },
@@ -27,6 +28,7 @@ export default function TaskCard({ task }: { task: Task }) {
   const isAssignee = user?.id === task.assignedToId;
   const priorityStyle = priorityConfig[task.priority];
   const statusStyle = statusConfig[task.status];
+  
 
   const handleDelete = () => {
     if (!isCreator) return;
@@ -72,30 +74,52 @@ export default function TaskCard({ task }: { task: Task }) {
           </button>
         </div>
 
-        {/* Role & Priority Badges */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          {isCreator ? (
-            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-              <UserIcon className="w-3 h-3" />
-              Creator
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium">
-              <UserIcon className="w-3 h-3" />
-              Assignee
-            </span>
-          )}
+       {/* Role, Priority & Due Badges */}
+<div className="flex flex-wrap items-center gap-2 mb-3">
+  {/* Role */}
+  {isCreator ? (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700">
+      <UserIcon className="w-3 h-3" />
+      Creator
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+      <UserIcon className="w-3 h-3" />
+      Assignee
+    </span>
+  )}
 
-          <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${priorityStyle.bg} ${priorityStyle.text}`}>
-            <span>{priorityStyle.icon}</span>
-            {task.priority}
-          </span>
-        </div>
+  {/* Priority */}
+  <span
+    className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full ${priorityStyle.bg} ${priorityStyle.text}`}
+  >
+    <span>{priorityStyle.icon}</span>
+    {task.priority}
+  </span>
+
+  {/* Due status */}
+  {task.status !== "COMPLETED" && task.isOverdue && (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+      <AlertTriangle className="w-3 h-3" />
+      Overdue
+    </span>
+  )}
+
+  {task.status !== "COMPLETED" && !task.isOverdue && task.isDueToday && (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
+      <Clock className="w-3 h-3" />
+      Due today
+    </span>
+  )}
+</div>
+
 
         {/* Description */}
         <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
           {task.description || "No description provided"}
         </p>
+
+
 
         {/* Status Selector */}
         <div className="space-y-3">
@@ -126,6 +150,8 @@ export default function TaskCard({ task }: { task: Task }) {
     <option value="REVIEW">👀 Review</option>
     <option value="COMPLETED">✅ Completed</option>
   </select>
+
+  
 
   {/* Chevron */}
   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">

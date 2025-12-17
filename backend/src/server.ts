@@ -2,6 +2,8 @@ import http from "http";
 import app from "./app";
 import { Server } from "socket.io";
 import { setupSockets } from "./sockets";
+import cron from "node-cron";
+import { checkOverdueTasks } from "./services/taskOverdue.service";
 
 const PORT = 5000;
 
@@ -18,6 +20,12 @@ export const io = new Server(server, {
 
 // 3️⃣ Setup socket listeners
 setupSockets(io);
+
+// Runs every day at 9 AM
+cron.schedule("* * * * *", async () => {
+  console.log("Running overdue task check...");
+  await checkOverdueTasks();
+});
 
 // 4️⃣ Start server
 server.listen(PORT, () => {

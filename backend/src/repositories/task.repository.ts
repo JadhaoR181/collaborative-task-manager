@@ -34,3 +34,14 @@ export const getTasksForUser = (userId: string, filters: any) => {
     orderBy: { dueDate: "asc" }
   });
 };
+
+
+export const getOverdueTasks = async () => {
+  return prisma.task.findMany({
+    where: {
+    status: { not: "COMPLETED" },
+    dueDate: { lt: new Date() },
+    overdueNotified: false
+  }
+  });
+};

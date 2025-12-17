@@ -10,6 +10,10 @@ export interface Task {
   dueDate: string;
   creatorId: string;
   assignedToId?: string;
+  isOverdue: boolean;
+  isDueToday: boolean;
+  overdueNotified: boolean;
+
 }
 
 export const useTasks = (filters?: {
