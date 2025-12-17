@@ -17,12 +17,14 @@ const statusConfig: Record<string, { bg: string; text: string }> = {
   COMPLETED: { bg: "bg-green-50", text: "text-green-700" }
 };
 
+
 export default function TaskCard({ task }: { task: Task }) {
   const { user } = useAuth();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
 
   const isCreator = user?.id === task.creatorId;
+  const isAssignee = user?.id === task.assignedToId;
   const priorityStyle = priorityConfig[task.priority];
   const statusStyle = statusConfig[task.status];
 
@@ -38,12 +40,6 @@ export default function TaskCard({ task }: { task: Task }) {
     }
   };
 
-  const handleStatusChange = (newStatus: string) => {
-    updateTask.mutate({
-      id: task.id,
-      data: { status: newStatus }
-    });
-  };
 
   return (
     <div className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all duration-300 overflow-hidden">
@@ -103,23 +99,53 @@ export default function TaskCard({ task }: { task: Task }) {
 
         {/* Status Selector */}
         <div className="space-y-3">
-          <div className="relative">
-            <select
-              value={task.status}
-              onChange={e => handleStatusChange(e.target.value)}
-              className={`w-full appearance-none px-4 py-2.5 pr-10 rounded-lg text-sm font-medium border-2 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 ${statusStyle.bg} ${statusStyle.text} border-transparent hover:border-gray-200`}
-            >
-              <option value="TODO">📋 To Do</option>
-              <option value="IN_PROGRESS">⚡ In Progress</option>
-              <option value="REVIEW">👀 Review</option>
-              <option value="COMPLETED">✅ Completed</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
-              <svg className={`w-4 h-4 ${statusStyle.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+         <div className="relative">
+  <select
+    value={task.status}
+    disabled={!isAssignee}
+    onChange={e =>
+      updateTask.mutate({
+        id: task.id,
+        data: { status: e.target.value }
+      })
+    }
+    className={`
+      w-full appearance-none px-4 py-2.5 pr-10 rounded-lg
+      text-sm font-medium border-2 transition-all
+      focus:outline-none focus:ring-2 focus:ring-indigo-500
+      ${statusStyle.bg} ${statusStyle.text}
+      ${isAssignee
+        ? "cursor-pointer hover:border-gray-300"
+        : "opacity-60 cursor-not-allowed"
+      }
+      border-transparent
+    `}
+  >
+    <option value="TODO">📋 To Do</option>
+    <option value="IN_PROGRESS">⚡ In Progress</option>
+    <option value="REVIEW">👀 Review</option>
+    <option value="COMPLETED">✅ Completed</option>
+  </select>
+
+  {/* Chevron */}
+  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+    <svg
+      className={`w-4 h-4 ${statusStyle.text}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </div>
+
+  {!isAssignee && (
+    <p className="text-[11px] text-gray-400 mt-1">
+      Only assignee can update status
+    </p>
+  )}
+</div>
+
 
           {/* Metadata Footer */}
           <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">

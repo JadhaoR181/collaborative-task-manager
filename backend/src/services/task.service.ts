@@ -50,24 +50,38 @@ export const updateTask = async (
   payload: any
 ) => {
   const task = await getTaskById(taskId);
-  if (!task) throw new ApiError(404, "Task not found");
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
 
+  // ❌ Neither creator nor assignee
   if (task.creatorId !== userId && task.assignedToId !== userId) {
-    throw new ApiError(403, "Not allowed");
+    throw new ApiError(403, "Not allowed to update this task");
+  }
+
+  // 🔒 STATUS update → ONLY ASSIGNEE
+  if (payload.status && task.assignedToId !== userId) {
+    throw new ApiError(
+      403,
+      "Only assignee can update task status"
+    );
   }
 
   const updatedTask = await updateTaskById(taskId, payload);
 
-  // Emit to creator
+  // 🔔 Emit updates
   io.to(task.creatorId).emit("task:updated", updatedTask);
 
-  // Emit to assignee
-  if (task.assignedToId && task.assignedToId !== task.creatorId) {
+  if (
+    task.assignedToId &&
+    task.assignedToId !== task.creatorId
+  ) {
     io.to(task.assignedToId).emit("task:updated", updatedTask);
   }
 
   return updatedTask;
 };
+
 
 
 export const deleteTask = async (taskId: string, userId: string) => {
