@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <AuthProvider>
           <SocketProvider>
             <App />
-             <Toaster position="top-right" />
+             <Toaster position="bottom-center" />
           </SocketProvider>
         </AuthProvider>
       </BrowserRouter>

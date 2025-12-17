@@ -44,38 +44,41 @@ export const getUserTasks = async (
 
   return getTasksForUser(userId, filters);
 };
+
 export const updateTask = async (
   taskId: string,
   userId: string,
   payload: any
 ) => {
   const task = await getTaskById(taskId);
-  if (!task) {
-    throw new ApiError(404, "Task not found");
-  }
+  if (!task) throw new ApiError(404, "Task not found");
 
-  // ❌ Neither creator nor assignee
-  if (task.creatorId !== userId && task.assignedToId !== userId) {
-    throw new ApiError(403, "Not allowed to update this task");
-  }
-
-  // 🔒 STATUS update → ONLY ASSIGNEE
+  // 🔒 Only assignee can update STATUS
   if (payload.status && task.assignedToId !== userId) {
-    throw new ApiError(
-      403,
-      "Only assignee can update task status"
-    );
+    throw new ApiError(403, "Only assignee can update task status");
   }
 
   const updatedTask = await updateTaskById(taskId, payload);
 
-  // 🔔 Emit updates
+  // 🔔 Notify creator when task is completed
+  if (
+    payload.status === "COMPLETED" &&
+    task.creatorId !== task.assignedToId
+  ) {
+    const message = `✅ Task "${task.title}" was completed`;
+
+    await createNotification(task.creatorId, message);
+
+    io.to(task.creatorId).emit("task:completed", {
+      task: updatedTask,
+      message
+    });
+  }
+
+  // 🔁 Sync updates to creator & assignee
   io.to(task.creatorId).emit("task:updated", updatedTask);
 
-  if (
-    task.assignedToId &&
-    task.assignedToId !== task.creatorId
-  ) {
+  if (task.assignedToId && task.assignedToId !== task.creatorId) {
     io.to(task.assignedToId).emit("task:updated", updatedTask);
   }
 

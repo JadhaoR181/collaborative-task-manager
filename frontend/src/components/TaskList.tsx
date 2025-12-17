@@ -10,6 +10,11 @@ export default function TaskList() {
   const [showFilters, setShowFilters] = useState(false);
 
   const { data, isLoading } = useTasks({ status, priority });
+const visibleTasks = status === "COMPLETED"
+  ? data
+  : data?.filter(task => task.status !== "COMPLETED");
+
+
 
   // Calculate statistics
   const stats = {
@@ -40,12 +45,12 @@ export default function TaskList() {
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">To Do</p>
-              <p className="text-3xl font-bold text-blue-600">{stats.todo}</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">In Progress</p>
+              <p className="text-3xl font-bold text-orange-600">{stats.inProgress}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
           </div>
@@ -54,12 +59,12 @@ export default function TaskList() {
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">In Progress</p>
-              <p className="text-3xl font-bold text-orange-600">{stats.inProgress}</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">To Do</p>
+              <p className="text-3xl font-bold text-blue-600">{stats.todo}</p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
@@ -86,9 +91,8 @@ export default function TaskList() {
           <div className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-gray-500" />
             <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
-            <span className="text-sm text-gray-500">
-              ({data?.length || 0} tasks)
-            </span>
+           
+
           </div>
 
           <button
@@ -106,7 +110,7 @@ export default function TaskList() {
                 onChange={e => setStatus(e.target.value || undefined)}
                 className="appearance-none w-full sm:w-auto pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors cursor-pointer"
               >
-                <option value="">All Status</option>
+                <option value="">Active Tasks</option>
                 <option value="TODO">📋 To Do</option>
                 <option value="IN_PROGRESS">⚡ In Progress</option>
                 <option value="REVIEW">👀 Review</option>
@@ -160,11 +164,12 @@ export default function TaskList() {
             <TaskSkeleton key={i} />
           ))}
 
-        {!isLoading && data?.map(task => (
-          <TaskCard key={task.id} task={task} />
-        ))}
+       {!isLoading && visibleTasks?.map(task => (
+  <TaskCard key={task.id} task={task} />
+))}
 
-        {!isLoading && data?.length === 0 && (
+
+        {!isLoading && visibleTasks?.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-16 px-4">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

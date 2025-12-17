@@ -36,6 +36,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socket.on("task:updated", () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     });
+    socket.on("task:completed", ({ message }) => {
+  toast.success(message);
+ queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+});
+
 
     return () => {
       socket.disconnect();

@@ -1,206 +1,191 @@
-import { Bell, LayoutList, LogOut, User, Menu, X } from "lucide-react";
+import {
+  Bell,
+  LayoutList,
+  LogOut,
+  User,
+  Menu,
+  X
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import NotificationsPanel from "./NotificationsPanel";
 import { useNotifications } from "../hooks/useNotifications";
 import { useAuth } from "../context/useAuth";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
+
 
 export default function Navbar() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const notifRef = useRef<HTMLDivElement>(null);
+  
+  const [shake, setShake] = useState(false);
+const prevUnreadRef = useRef<number>(0);
+const notifRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: notifications } = useNotifications();
+
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
-  const unreadCount = notifications?.filter(n => !n.read).length ?? 0;
+  const { data: notifications } = useNotifications();
 
-  // Close notifications on outside click
+const unreadCount =
+  notifications?.filter(n => !n.read).length ?? 0;
+
+
+
+
+  /* ───────────────── Outside click ───────────────── */
   useEffect(() => {
+   
     const handler = (e: MouseEvent | TouchEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+      if (unreadCount > prevUnreadRef.current) {
+    setShake(true);
+    setTimeout(() => setShake(false), 600);
+  }
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(e.target as Node)
+      ) {
         setNotificationsOpen(false);
       }
     };
-    
-    // Use both mouse and touch events for better mobile support
+
     document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler, { passive: true });
-    
+    document.addEventListener("touchstart", handler);
+
     return () => {
       document.removeEventListener("mousedown", handler);
       document.removeEventListener("touchstart", handler);
+      prevUnreadRef.current = unreadCount;
     };
-  }, []);
+  }, [unreadCount]);
 
-  // Toggle notifications & mark as read
-  const toggleNotifications = async (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const newState = !notificationsOpen;
-    setNotificationsOpen(newState);
+  /* ───────────────── Handlers ───────────────── */
+  const toggleNotifications = async () => {
+    const next = !notificationsOpen;
+    setNotificationsOpen(next);
 
-    // Mark as read when opening
-    if (newState && unreadCount > 0) {
+    if (next && unreadCount > 0) {
       try {
         await api.post("/notifications/read");
-      } catch (error) {
-        console.error("Failed to mark notifications as read:", error);
+      } catch (err) {
+        console.error("Failed to mark notifications as read", err);
       }
     }
   };
 
-  // Close notifications handler
-  const closeNotifications = () => {
-    setNotificationsOpen(false);
-  };
-
-  // Logout
   const logout = async () => {
-    try {
-      await api.post("/auth/logout");
-      setUser(null);
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+    await api.post("/auth/logout");
+    setUser(null);
+    navigate("/login");
   };
 
+  /* ───────────────── UI ───────────────── */
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Brand */}
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="h-16 flex items-center justify-between">
+          {/* ───── Brand ───── */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                <LayoutList className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
+              <LayoutList className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-lg text-indigo-600">
+                TaskMaster<span className="text-gray-900">X</span>
+              </p>
+              <p className="hidden sm:block text-xs text-gray-500">
+                Collaborative Task Manager
+              </p>
+            </div>
+          </div>
+
+          {/* ───── Right Side ───── */}
+          <div className="flex items-center gap-2">
+            {/* 🔔 Notification Bell (VISIBLE ON MOBILE + DESKTOP) */}
+            <div className="relative" ref={notifRef}>
+             <button
+  onClick={toggleNotifications}
+  className="relative p-2 rounded-full hover:bg-gray-100 transition focus:outline-none"
+>
+  <motion.div
+    animate={
+      shake
+        ? { rotate: [0, -15, 15, -10, 10, 0] }
+        : {}
+    }
+    transition={{ duration: 0.6 }}
+  >
+    <Bell className="w-5 h-5 text-gray-700" />
+  </motion.div>
+
+  {unreadCount > 0 && (
+    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+      {unreadCount}
+    </span>
+  )}
+</button>
+
+
+              {notificationsOpen && (
+                <NotificationsPanel
+                  onClose={() => setNotificationsOpen(false)}
+                />
+              )}
+            </div>
+
+            {/* ☰ Hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(p => !p)}
+              className="md:hidden p-2 rounded-xl hover:bg-gray-100"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 text-gray-700" />
+              ) : (
+                <Menu className="w-6 h-6 text-gray-700" />
+              )}
+            </button>
+
+            {/* Desktop User Info */}
+            <div className="hidden md:flex items-center gap-3 pl-4 border-l">
+              <div className="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="flex items-center gap-1">
-                  <span className="text-indigo-600 font-bold text-xl">TaskMaster</span>
-                  <span className="text-gray-800 font-bold text-xl">X</span>
-                </div>
-                <span className="text-xs text-gray-500 hidden sm:block">
-                  Collaborative Task Manager
-                </span>
+                <p className="text-sm font-semibold">{user?.name}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
-            </div>
-          </div>
-
-          {/* Desktop Right Section */}
-          <div className="hidden md:flex items-center gap-4">
-            {/* Notifications */}
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={toggleNotifications}
-                onTouchEnd={toggleNotifications}
-                className="relative p-2.5 rounded-xl hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 touch-manipulation"
-                aria-label="Notifications"
-                aria-expanded={notificationsOpen}
-              >
-                <Bell className="w-5 h-5 text-gray-700" />
-
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full font-semibold shadow-lg animate-pulse">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {notificationsOpen && <NotificationsPanel onClose={closeNotifications} />}
-            </div>
-
-            {/* User Info */}
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
-                <User className="w-5 h-5 text-white" />
-              </div>
-
-              <div className="leading-tight">
-                <p className="text-sm font-semibold text-gray-900">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {user?.email}
-                </p>
-              </div>
-
               <button
                 onClick={logout}
-                className="p-2.5 rounded-xl hover:bg-red-50 transition-colors group touch-manipulation"
-                title="Logout"
+                className="p-2 rounded-xl hover:bg-red-50"
               >
-                <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-600 transition-colors" />
+                <LogOut className="w-4 h-4 text-gray-500 hover:text-red-600" />
               </button>
             </div>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-gray-700" />
-            ) : (
-              <Menu className="w-6 h-6 text-gray-700" />
-            )}
-          </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* ───── Mobile Menu ───── */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-4">
-            {/* User Info Mobile */}
+          <div className="md:hidden border-t pt-4 space-y-4">
             <div className="flex items-center gap-3 px-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+              <div className="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center">
                 <User className="w-5 h-5 text-white" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {user?.email}
-                </p>
+              <div>
+                <p className="text-sm font-semibold">{user?.name}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
             </div>
 
-            {/* Notifications Mobile */}
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={toggleNotifications}
-                onTouchEnd={toggleNotifications}
-                className="w-full flex items-center justify-between px-2 py-2.5 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
-              >
-                <div className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-gray-700" />
-                  <span className="text-sm font-medium text-gray-900">
-                    Notifications
-                  </span>
-                </div>
-                {unreadCount > 0 && (
-                  <span className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full font-semibold px-1.5">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {notificationsOpen && <NotificationsPanel onClose={closeNotifications} />}
-            </div>
-
-            {/* Logout Mobile */}
             <button
               onClick={logout}
-              className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-red-50 transition-colors text-red-600 touch-manipulation"
+              className="w-full flex items-center gap-3 px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg"
             >
               <LogOut className="w-5 h-5" />
-              <span className="text-sm font-medium">Logout</span>
+              Logout
             </button>
           </div>
         )}
