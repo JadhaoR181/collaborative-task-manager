@@ -2,6 +2,10 @@ import { Trash2, Clock, User as UserIcon, AlertTriangle } from "lucide-react";
 import { useUpdateTask, useDeleteTask } from "../hooks/useTaskMutations";
 import { Task } from "../hooks/useTasks";
 import { useAuth } from "../context/useAuth";
+import { Pencil } from "lucide-react";
+import EditTaskModal from "./EditTaskModal";
+import { useState } from "react";
+
 
 
 const priorityConfig: Record<string, { bg: string; text: string; icon: string }> = {
@@ -28,6 +32,8 @@ export default function TaskCard({ task }: { task: Task }) {
   const isAssignee = user?.id === task.assignedToId;
   const priorityStyle = priorityConfig[task.priority];
   const statusStyle = statusConfig[task.status];
+  const [editing, setEditing] = useState(false);
+
   
 
   const handleDelete = () => {
@@ -59,6 +65,16 @@ export default function TaskCard({ task }: { task: Task }) {
           <h3 className="font-semibold text-gray-900 text-lg leading-tight group-hover:text-indigo-600 transition-colors flex-1 line-clamp-2">
             {task.title}
           </h3>
+
+{isCreator && (
+  <button
+    onClick={() => setEditing(true)}
+    className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"
+    title="Edit task"
+  >
+    <Pencil className="w-4 h-4" />
+  </button>
+)}
 
           <button
             onClick={handleDelete}
@@ -171,6 +187,10 @@ export default function TaskCard({ task }: { task: Task }) {
     </p>
   )}
 </div>
+
+{editing && (
+  <EditTaskModal task={task} onClose={() => setEditing(false)} />
+)}
 
 
           {/* Metadata Footer */}
