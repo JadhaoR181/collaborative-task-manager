@@ -1,3 +1,8 @@
 import { createContext } from "react";
+import { Socket } from "socket.io-client";
 
-export const SocketContext = createContext<null>(null);
+export interface SocketContextValue {
+  getSocket: () => Socket | null;
+}
+
+export const SocketContext = createContext<SocketContextValue | null>(null);
