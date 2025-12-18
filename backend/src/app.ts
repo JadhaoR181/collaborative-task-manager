@@ -20,6 +20,10 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+app.route("/").get((req, res) => {
+  res.send("Collaborative Task Manager API is running!");
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
