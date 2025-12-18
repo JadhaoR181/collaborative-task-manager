@@ -5,20 +5,20 @@ import { setupSockets } from "./sockets";
 import cron from "node-cron";
 import { checkOverdueTasks } from "./services/taskOverdue.service";
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-// 1️⃣ Create HTTP server
+
 const server = http.createServer(app);
 
-// 2️⃣ Socket.io (exported for services)
+
 export const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true
   }
 });
 
-// 3️⃣ Setup sockets ONLY in runtime
+
 if (process.env.NODE_ENV !== "test") {
   setupSockets(io);
 
@@ -29,7 +29,7 @@ if (process.env.NODE_ENV !== "test") {
   });
 }
 
-// 4️⃣ Start server ONLY if not imported by tests
+//  Start server ONLY if not imported by tests
 if (process.env.NODE_ENV !== "test") {
   server.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
