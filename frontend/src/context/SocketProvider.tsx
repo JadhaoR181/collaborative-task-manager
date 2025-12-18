@@ -11,7 +11,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user) return;
 
-    const socket = io(import.meta.env.BACKEND_URL.replace("/api", ""), {
+    const socket = io(import.meta.env.VITE_BACKEND_URL.replace("/api", ""), {
       withCredentials: true,
       auth: {
         userId: user.id
