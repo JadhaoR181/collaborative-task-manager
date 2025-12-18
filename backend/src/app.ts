@@ -12,7 +12,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://collaborative-task-manager-tau.vercel.app",
+    origin: [
+      process.env.FRONTEND_URL || "https://collaborative-task-manager-tau.vercel.app",
+      "https://collaborative-task-manager-tau.vercel.app"
+    ],
     credentials: true
   })
 );

@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const loadUser = async () => {
+  const fetchMe = async () => {
     try {
       const res = await api.get("/users/me");
       setUser(res.data);
@@ -17,8 +17,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
+  
 
-  loadUser();
+  fetchMe();
 }, []);
 
 
