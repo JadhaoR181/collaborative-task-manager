@@ -41,3 +41,16 @@ export const userDebug = async () => {
   const users = await prisma.user.findMany();
   return { count: users.length };
 };
+
+export const getUsersExceptCurrent = (currentUserId: string) => {
+  return prisma.user.findMany({
+    where: {
+      id: { not: currentUserId }
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true
+    }
+  });
+};

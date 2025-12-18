@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { getCurrentUser, updateProfile, getAllUsers } from "../services/user.service";
 import { updateProfileDto } from "../dtos/user.dto";
 
+
 export const getMe = async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
 
@@ -17,7 +18,15 @@ export const updateMe = async (req: Request, res: Response) => {
   res.status(200).json(updatedUser);
 };
 
-export const getUsers = async (_req: Request, res: Response) => {
-  const users = await getAllUsers();
+// export const getUsers = async (_req: Request, res: Response) => {
+//   const users = await getAllUsers();
+//   res.status(200).json(users);
+// };
+
+export const getAllUsersHandler = async (req: Request, res: Response) => {
+  const currentUserId = (req as any).user.id;
+
+  const users = await getAllUsers(currentUserId);
+
   res.status(200).json(users);
 };
