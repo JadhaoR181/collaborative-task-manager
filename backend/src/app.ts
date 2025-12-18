@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.route("/").get((req, res) => {
-  res.send("Collaborative Task Manager API is running!");
+  res.json({ message: "Collaborative Task Manager API is running!" });
 });
 
 // Routes
