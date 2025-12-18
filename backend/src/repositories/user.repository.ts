@@ -36,3 +36,8 @@ export const findAllUsers = () => {
     }
   });
 };
+
+export const userDebug = async () => {
+  const users = await prisma.user.findMany();
+  return { count: users.length };
+};

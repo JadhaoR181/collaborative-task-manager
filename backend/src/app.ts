@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes";
 import taskRoutes from "./routes/task.routes";
 import notificationRoutes from "./routes/notification.routes";
 import { errorHandler } from "./middlewares/error.middleware";
+import debugRoutes from "./routes/debug.routes";
 
 const app = express();
 
@@ -32,6 +33,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/debug", debugRoutes);
+
 
 // ❗ Error handler MUST be last
 app.use(errorHandler);

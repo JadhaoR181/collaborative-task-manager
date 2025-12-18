@@ -4,7 +4,7 @@ import { getMe, updateMe, getUsers } from "../controllers/user.controller";
 
 const router = Router();
 
-router.get("/", authMiddleware, getUsers); 
+router.get("/", authMiddleware, getUsers);
 router.get("/me", authMiddleware, getMe);
 router.put("/me", authMiddleware, updateMe);
 
