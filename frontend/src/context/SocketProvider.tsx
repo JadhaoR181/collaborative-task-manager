@@ -1,39 +1,52 @@
-import { useEffect, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { useEffect } from "react";
+import { io } from "socket.io-client";
 import { useQueryClient } from "@tanstack/react-query";
-import { SocketContext } from "./socket.context";
+import { useAuth } from "./useAuth";
 import toast from "react-hot-toast";
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const socketRef = useRef<Socket | null>(null);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) return;
+
     const socket = io(import.meta.env.BACKEND_URL.replace("/api", ""), {
-      withCredentials: true
+      withCredentials: true,
+      auth: {
+        userId: user.id
+      },
+      transports: ["websocket", "polling"]
     });
 
-    socket.on("task:assigned", () => {
+    socket.on("connect", () => {
+      console.log("✅ Socket connected:", socket.id);
+    });
+
+    socket.on("connect_error", err => {
+      console.error("❌ Socket connect error:", err.message);
+    });
+
+    socket.on("task:assigned", data => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      toast.success("New task assigned");
+      toast.success(data?.message || "New task assigned");
     });
 
-    socketRef.current = socket;
+    socket.on("task:updated", () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    });
+    socket.on("task:completed", ({ message }) => {
+  toast.success(message);
+ queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+});
+
 
     return () => {
       socket.disconnect();
-      socketRef.current = null;
     };
-  }, [queryClient]);
+  }, [user, queryClient]);
 
-  return (
-    <SocketContext.Provider
-      value={{
-        getSocket: () => socketRef.current
-      }}
-    >
-      {children}
-    </SocketContext.Provider>
-  );
+  return <>{children}</>;
 };
