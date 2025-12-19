@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import { createUser, findUserByEmail } from "../repositories/user.repository";
 import { generateToken } from "../utils/jwt";
 
+
+
 export const registerUser = async (
   name: string,
   email: string,

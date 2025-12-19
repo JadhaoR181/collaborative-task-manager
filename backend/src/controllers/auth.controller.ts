@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { loginDto, registerDto } from "../dtos/auth.dto";
 import { loginUser, registerUser } from "../services/auth.service";
+import { authCookieOptions } from "../config/cookies";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -12,12 +13,8 @@ export const register = async (req: Request, res: Response) => {
       validatedData.password
     );
 
-    res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie("token", token, authCookieOptions);
+
 
     res.status(201).json({
       message: "User registered successfully",
@@ -36,13 +33,7 @@ export const login = async (req: Request, res: Response) => {
       validatedData.email,
       validatedData.password
     );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax"
-    });
-
+    res.cookie("token", token, authCookieOptions);
     res.status(200).json({
       message: "Login successful",
       user: { id: user.id, name: user.name, email: user.email }
@@ -53,11 +44,10 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = async (_req: Request, res: Response) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false // true in production (HTTPS)
-  });
+ res.clearCookie("token", {
+  ...authCookieOptions,
+  maxAge: 0
+});
 
   res.status(200).json({ message: "Logged out successfully" });
 };
