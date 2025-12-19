@@ -14,10 +14,25 @@
 
 ## 📸 Preview
 
-<div align="center">
-  <img src="screenshot.png" alt="TaskMasterX Dashboard" width="900px" />
-  <p><i>Real-time task management with intuitive dashboard and live notifications</i></p>
-</div>
+<table>
+  <tr>
+    <td width="68%" valign="top">
+      <img src="images/dashboard_page.png" alt="TaskMasterX Dashboard" style="border-radius: 8px;" />
+      <img src="images/notification_panel.png" alt="TaskMaterX Notification Panel" style="border-radius:8px"/>
+    </td>
+    <td width="32%" valign="top">
+      <img src="images/mobile_preview.png" alt="Mobile View" style="border-radius: 8px;" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <sub><i>🖥️ Full-featured desktop experience with real-time updates</i></sub>
+    </td>
+    <td align="center">
+      <sub><i>📱 Fully responsive mobile interface</i></sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
