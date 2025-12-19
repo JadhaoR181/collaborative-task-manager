@@ -18,7 +18,6 @@
   <tr>
     <td width="68%" valign="top">
       <img src="images/dashboard_page.png" alt="TaskMasterX Dashboard" style="border-radius: 8px;" />
-      <img src="images/notification_panel.png" alt="TaskMaterX Notification Panel" style="border-radius:8px"/>
     </td>
     <td width="32%" valign="top">
       <img src="images/mobile_preview.png" alt="Mobile View" style="border-radius: 8px;" />
